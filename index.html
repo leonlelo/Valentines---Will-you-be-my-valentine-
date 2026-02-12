@@ -452,10 +452,18 @@
       wrapper.style.top = rect.top + 'px';
       requestAnimationFrame(() => {
         const pad = 24;
-        const maxX = window.innerWidth - rect.width - pad;
-        const maxY = window.innerHeight - rect.height - pad;
-        wrapper.style.left = Math.max(pad, Math.random() * maxX) + 'px';
-        wrapper.style.top = Math.max(pad, Math.random() * maxY) + 'px';
+        const vp = window.visualViewport || window;
+        const w = vp.width || window.innerWidth;
+        const h = vp.height || window.innerHeight;
+        const offsetTop = (vp.offsetTop || 0);
+        const minTop = offsetTop + pad;
+        const maxTop = offsetTop + h - rect.height - pad - 40;
+        const minLeft = pad;
+        const maxLeft = w - rect.width - pad;
+        const x = minLeft + Math.random() * Math.max(0, maxLeft - minLeft);
+        const y = minTop + Math.random() * Math.max(0, maxTop - minTop);
+        wrapper.style.left = x + 'px';
+        wrapper.style.top = y + 'px';
       });
     }
 
