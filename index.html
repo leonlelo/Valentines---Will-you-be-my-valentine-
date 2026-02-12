@@ -450,66 +450,6 @@
 
     let bounceId = null;
 
-    function startBounce(wrapper) {
-      const rect = wrapper.getBoundingClientRect();
-      wrapper.classList.add('runaway');
-      let x = rect.left;
-      let y = rect.top;
-      const width = rect.width;
-      const height = rect.height;
-      wrapper.style.left = x + 'px';
-      wrapper.style.top = y + 'px';
-
-      const pad = 24;
-      const speed = 2.8;
-      const damp = 0.92;
-      let vx = (Math.random() - 0.5) * speed * 2;
-      let vy = (Math.random() - 0.5) * speed * 2;
-      if (Math.abs(vx) < 0.8) vx = vx >= 0 ? 1 : -1;
-      if (Math.abs(vy) < 0.8) vy = vy >= 0 ? 1 : -1;
-
-      function getBounds() {
-        const vp = window.visualViewport || window;
-        const w = vp.width || window.innerWidth;
-        const h = vp.height || window.innerHeight;
-        const offsetTop = (vp.offsetTop || 0);
-        return {
-          minLeft: pad,
-          maxLeft: w - width - pad,
-          minTop: offsetTop + pad,
-          maxTop: offsetTop + h * 0.5 - height - pad,
-        };
-      }
-
-      function tick() {
-        const b = getBounds();
-        x += vx;
-        y += vy;
-
-        if (x <= b.minLeft) {
-          x = b.minLeft;
-          vx = -vx * damp;
-        } else if (x >= b.maxLeft) {
-          x = b.maxLeft;
-          vx = -vx * damp;
-        }
-        if (y <= b.minTop) {
-          y = b.minTop;
-          vy = -vy * damp;
-        } else if (y >= b.maxTop) {
-          y = b.maxTop;
-          vy = -vy * damp;
-        }
-
-        wrapper.style.left = x + 'px';
-        wrapper.style.top = y + 'px';
-        bounceId = requestAnimationFrame(tick);
-      }
-
-      if (bounceId != null) cancelAnimationFrame(bounceId);
-      bounceId = requestAnimationFrame(tick);
-    }
-
     function stopBounce() {
       if (bounceId != null) {
         cancelAnimationFrame(bounceId);
@@ -517,12 +457,50 @@
       }
     }
 
-    btnNo.addEventListener('mouseenter', (e) => {
-      startBounce(e.target.closest('.runaway-wrapper'));
+    function startBounce(wrapper) {
+      if (!wrapper) return;
+      if (bounceId != null) cancelAnimationFrame(bounceId);
+      const rect = wrapper.getBoundingClientRect();
+      wrapper.classList.add('runaway');
+      let x = rect.left;
+      let y = rect.top;
+      const width = rect.width;
+      const height = rect.height;
+
+      const pad = 24;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const minLeft = pad;
+      const maxLeft = Math.max(minLeft, w - width - pad);
+      const minTop = pad;
+      const maxTop = Math.max(minTop, Math.min(h * 0.5 - height - pad, h - height - pad - 40));
+
+      let vx = 2.5 * (Math.random() > 0.5 ? 1 : -1);
+      let vy = 2.5 * (Math.random() > 0.5 ? 1 : -1);
+      const damp = 0.88;
+
+      function tick() {
+        x += vx;
+        y += vy;
+
+        if (x <= minLeft) { x = minLeft; vx = -vx * damp; }
+        else if (x >= maxLeft) { x = maxLeft; vx = -vx * damp; }
+        if (y <= minTop) { y = minTop; vy = -vy * damp; }
+        else if (y >= maxTop) { y = maxTop; vy = -vy * damp; }
+
+        wrapper.style.left = x + 'px';
+        wrapper.style.top = y + 'px';
+        bounceId = requestAnimationFrame(tick);
+      }
+      bounceId = requestAnimationFrame(tick);
+    }
+
+    btnNo.addEventListener('mouseenter', () => {
+      startBounce(runawayWrapper);
     });
 
     btnNo.addEventListener('touchstart', (e) => {
-      startBounce(e.target.closest('.runaway-wrapper'));
+      startBounce(runawayWrapper);
       e.preventDefault();
     }, { passive: false });
 
