@@ -457,7 +457,8 @@
         const h = vp.height || window.innerHeight;
         const offsetTop = (vp.offsetTop || 0);
         const minTop = offsetTop + pad;
-        const maxTop = offsetTop + h - rect.height - pad - 40;
+        const maxTopAllowed = offsetTop + h * 0.5;
+        const maxTop = Math.min(maxTopAllowed, offsetTop + h - rect.height - pad - 40);
         const minLeft = pad;
         const maxLeft = w - rect.width - pad;
         const x = minLeft + Math.random() * Math.max(0, maxLeft - minLeft);
